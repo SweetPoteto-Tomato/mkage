@@ -1,1 +1,1 @@
-clang main.cc -omkage.exe
+clang main.cc reader.cc -omkage.exe
