@@ -5,7 +5,7 @@
 namespace node {
 
 std::string Dependency::ToString() {
-	return std::string();
+	return std::string("dependency");
 }
 
 Rule::Rule(std::list<std::string> &&cmds, std::list<Dependency> &&c)

@@ -11,9 +11,12 @@ constexpr int kMaxLengthOfLine = 80;
 
 class ReaderError : public std::runtime_error {
 public:
-	ReaderError();
+	ReaderError(const char *message, int line);
 
 	const char *what() const;
+
+private:
+	char message_[80];
 };
 
 class Reader {
@@ -24,9 +27,10 @@ public:
 
 private:
 	FILE *input_;
+	int line_number_;
 	char line_[kMaxLengthOfLine];
 
-	void ConsumeLine();
+	bool ConsumeLine();
 	bool IsIndentedLine();
 	std::list<std::string> ReadCommands();
 };

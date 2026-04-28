@@ -6,54 +6,65 @@
 
 namespace reader {
 
-ReaderError::ReaderError() : std::runtime_error("ReaderError") {}
-
-const char *ReaderError::what() const {
-	return "ReaderError";
+ReaderError::ReaderError(const char *message, int line)
+	: std::runtime_error("ReaderError") {
+	std::snprintf(message_, sizeof(message_), "(%d)%s", line, message);
 }
 
-Reader::Reader(FILE *input) : input_(input) {}
+const char *ReaderError::what() const {
+	return message_;
+}
+
+Reader::Reader(FILE *input) : input_(input), line_number_(0) {}
 
 std::list<node::Rule> Reader::ReadRules() {
 	std::list<node::Rule> rules;
 	for (;;) {
-		ConsumeLine();
-		if (!IsIndentedLine()) {
-			throw ReaderError();
+		if (!ConsumeLine()) {
+			if (std::feof(input_))
+				break;
+			else
+				throw ReaderError("There has to be a header.", line_number_);
 		}
-		ConsumeLine();
 		if (IsIndentedLine()) {
-			throw ReaderError();
+			throw ReaderError("Headers should be not indented.", line_number_);
+		}
+		if (!ConsumeLine())
+			throw ReaderError("The file is interrupted at a point where rules should be written.", line_number_);
+		if (!IsIndentedLine()) {
+			throw ReaderError("Indent lines to list rules when you write them.", line_number_);
 		}
 		auto comannds = ReadCommands();
 		if (std::strcmp("in", line_))
-			throw ReaderError();
+			throw ReaderError("There has to be \"in\".", line_number_);
 		std::list<node::Dependency> contents;
 		rules.emplace_back(std::move(comannds), std::move(contents));
 	}
 	return rules;
 }
 
-void Reader::ConsumeLine() {
+bool Reader::ConsumeLine() {
 	if (input_ == NULL)
-		throw ReaderError();
+		return false;
 	if (std::fgets(line_, sizeof(line_), input_) == NULL)
-		throw ReaderError();
+		return false;
 	char *c;
-	for (c = line_; *c && !std::isspace(*c); ++c) {}
+	for (c = line_; *c && *c != '\n' && *c != '\r'; ++c) {}
 	*c = '\0';
+	++line_number_;
+	return true;
 }
 
 bool Reader::IsIndentedLine() {
-	return std::isspace(line_[0]);
+	return line_[0] == '\t';
 }
 
 std::list<std::string> Reader::ReadCommands() {
 	std::list<std::string> commands;
-	ConsumeLine();
 	while (IsIndentedLine()) {
 		commands.emplace_back(line_);
-		ConsumeLine();
+		if (!ConsumeLine())
+			throw ReaderError("Reader reached EOF while reading the file.", line_number_);
 	}
 	return commands;
 }

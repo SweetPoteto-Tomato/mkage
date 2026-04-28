@@ -9,7 +9,7 @@ int main(int argc, char **argv) {
 		reader::Reader r(input_file);
 		auto rules = r.ReadRules();
 		for (auto &r : rules)
-			r.ToString();
+			std::puts(r.ToString().c_str());
 	} catch (const reader::ReaderError &e) {
 		std::puts(e.what());
 	}
