@@ -5,8 +5,14 @@ int main(int argc, char **argv) {
 	if (argc != 2) return -1;
 	if ((input_file = std::fopen(argv[1], "r")) == NULL)
 		return -1;
-	reader::Reader r(input_file);
-	while (r.ConsumeLine() != NULL) {}
+	try {
+		reader::Reader r(input_file);
+		auto rules = r.ReadRules();
+		for (auto &r : rules)
+			r.ToString();
+	} catch (const reader::ReaderError &e) {
+		std::puts(e.what());
+	}
 	std::fclose(input_file);
 	return 0;
 }

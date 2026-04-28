@@ -3,18 +3,32 @@
 
 #include <cstdio>
 
+#include "node.h"
+
 namespace reader {
 
 constexpr int kMaxLengthOfLine = 80;
+
+class ReaderError : public std::runtime_error {
+public:
+	ReaderError();
+
+	const char *what() const;
+};
 
 class Reader {
 public:
 	Reader(FILE *input);
 
-	bool ConsumeLine();
+	std::list<node::Rule> ReadRules();
 
 private:
 	FILE *input_;
+	char line_[kMaxLengthOfLine];
+
+	void ConsumeLine();
+	bool IsIndentedLine();
+	std::list<std::string> ReadCommands();
 };
 
 } // namespace reader
