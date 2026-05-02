@@ -9,6 +9,8 @@ namespace node {
 using file_names = std::list<std::string>;
 
 struct Dependency {
+	Dependency(file_names &&wd, file_names &&wtdo);
+
 	file_names what_depend;
 	file_names what_they_depend_on;
 

@@ -32,7 +32,10 @@ private:
 
 	bool ConsumeLine();
 	bool IsIndentedLine();
+	std::list<std::string> SplitString(const char *target, char by);
+
 	std::list<std::string> ReadCommands();
+	std::list<node::Dependency> ReadDependencies();
 };
 
 } // namespace reader
